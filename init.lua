@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = "a"
@@ -122,7 +122,7 @@ end)
 vim.opt.breakindent = true
 
 -- Save undo history
-vim.opt.undofile = true
+vim.opt.undofile = false
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
@@ -226,10 +226,17 @@ vim.opt.rtp:prepend(lazypath)
 --  To update plugins you can run
 --    :Lazy update
 --
+--Autoupdate
+vim.api.nvim_create_autocmd("VimEnter", {
+	callback = function()
+		require("lazy").update({ show = false })
+	end,
+})
+
 -- NOTE: Here is where you install your plugins.
 require("lazy").setup({
 	-- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-	"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
+	--"tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 
 	-- NOTE: Plugins can also be added by using a table,
 	-- with the first argument being the link and the following
@@ -243,18 +250,18 @@ require("lazy").setup({
 	--    require('gitsigns').setup({ ... })
 	--
 	-- See `:help gitsigns` to understand what the configuration keys do
-	{ -- Adds git related signs to the gutter, as well as utilities for managing changes
-		"lewis6991/gitsigns.nvim",
-		opts = {
-			signs = {
-				add = { text = "+" },
-				change = { text = "~" },
-				delete = { text = "_" },
-				topdelete = { text = "‾" },
-				changedelete = { text = "~" },
-			},
-		},
-	},
+	-- { -- Adds git related signs to the gutter, as well as utilities for managing changes
+	-- 	"lewis6991/gitsigns.nvim",
+	-- 	opts = {
+	-- 		signs = {
+	-- 			add = { text = "+" },
+	-- 			change = { text = "~" },
+	-- 			delete = { text = "_" },
+	-- 			topdelete = { text = "‾" },
+	-- 			changedelete = { text = "~" },
+	-- 		},
+	-- 	},
+	-- },
 
 	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
 	--
@@ -271,24 +278,24 @@ require("lazy").setup({
 	-- after the plugin has been loaded:
 	--  config = function() ... end
 
-	{ -- Useful plugin to show you pending keybinds.
-		"folke/which-key.nvim",
-		event = "VimEnter", -- Sets the loading event to 'VimEnter'
-		config = function() -- This is the function that runs, AFTER loading
-			require("which-key").setup()
-
-			-- Document existing key chains
-			require("which-key").add({
-				{ "<leader>c", group = "[C]ode" },
-				{ "<leader>d", group = "[D]ocument" },
-				{ "<leader>r", group = "[R]ename" },
-				{ "<leader>s", group = "[S]earch" },
-				{ "<leader>w", group = "[W]orkspace" },
-				{ "<leader>t", group = "[T]oggle" },
-				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
-			})
-		end,
-	},
+	-- { -- Useful plugin to show you pending keybinds.
+	-- 	"folke/which-key.nvim",
+	-- 	event = "VimEnter", -- Sets the loading event to 'VimEnter'
+	-- 	config = function() -- This is the function that runs, AFTER loading
+	-- 		require("which-key").setup()
+	--
+	-- 		-- Document existing key chains
+	-- 		require("which-key").add({
+	-- 			{ "<leader>c", group = "[C]ode" },
+	-- 			{ "<leader>d", group = "[D]ocument" },
+	-- 			{ "<leader>r", group = "[R]ename" },
+	-- 			{ "<leader>s", group = "[S]earch" },
+	-- 			{ "<leader>w", group = "[W]orkspace" },
+	-- 			{ "<leader>t", group = "[T]oggle" },
+	-- 			{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
+	-- 		})
+	-- 	end,
+	-- },
 
 	-- NOTE: Plugins can specify dependencies.
 	--
@@ -347,11 +354,12 @@ require("lazy").setup({
 				-- You can put your default mappings / updates / etc. in here
 				--  All the info you're looking for is in `:help telescope.setup()`
 				--
-				-- defaults = {
-				--   mappings = {
-				--     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-				--   },
-				-- },
+				defaults = {
+					-- mappings = {
+					-- 	i = { ["<c-enter>"] = "to_fuzzy_refine" },
+					-- },
+					history = false,
+				},
 				-- pickers = {}
 				extensions = {
 					["ui-select"] = {
@@ -421,13 +429,29 @@ require("lazy").setup({
 		"neovim/nvim-lspconfig",
 		dependencies = {
 			-- Automatically install LSPs and related tools to stdpath for Neovim
-			{ "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
+			{
+				"williamboman/mason.nvim",
+				opts = {
+					log_level = vim.log.levels.OFF,
+					pip = {
+						install_args = { "--no-cache-dir" },
+					},
+				},
+			}, -- NOTE: Must be loaded before dependants
 			"williamboman/mason-lspconfig.nvim",
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 
 			-- Useful status updates for LSP.
 			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-			{ "j-hui/fidget.nvim", opts = {} },
+			{
+				"j-hui/fidget.nvim",
+				opts = {
+					logger = {
+						level = vim.log.levels.OFF,
+						path = "/dev/null",
+					},
+				},
+			},
 		},
 		config = function()
 			-- Brief aside: **What is LSP?**
@@ -459,6 +483,7 @@ require("lazy").setup({
 			--    That is to say, every time a new file is opened that is associated with
 			--    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
 			--    function will be executed to configure the current buffer
+			vim.lsp.set_log_level("off")
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 				callback = function(event)
@@ -688,12 +713,12 @@ require("lazy").setup({
 					-- `friendly-snippets` contains a variety of premade snippets.
 					--    See the README about individual language/framework/plugin snippets:
 					--    https://github.com/rafamadriz/friendly-snippets
-					-- {
-					--   'rafamadriz/friendly-snippets',
-					--   config = function()
-					--     require('luasnip.loaders.from_vscode').lazy_load()
-					--   end,
-					-- },
+					{
+						"rafamadriz/friendly-snippets",
+						config = function()
+							require("luasnip.loaders.from_vscode").lazy_load()
+						end,
+					},
 				},
 			},
 			"saadparwaiz1/cmp_luasnip",
@@ -902,9 +927,9 @@ require("lazy").setup({
 	--  Uncomment any of the lines below to enable them (you will need to restart nvim).
 	--
 	-- require 'kickstart.plugins.debug',
-	-- require 'kickstart.plugins.indent_line',
-	-- require 'kickstart.plugins.lint',
-	-- require 'kickstart.plugins.autopairs',
+	require("kickstart.plugins.indent_line"),
+	require("kickstart.plugins.lint"),
+	require("kickstart.plugins.autopairs"),
 	-- require 'kickstart.plugins.neo-tree',
 	-- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -915,6 +940,11 @@ require("lazy").setup({
 	--    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
 	-- { import = 'custom.plugins' },
 }, {
+	performance = {
+		cache = {
+			enabled = false,
+		},
+	},
 	ui = {
 		-- If you are using a Nerd Font: set icons to an empty table which will use the
 		-- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
