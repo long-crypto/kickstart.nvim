@@ -225,14 +225,13 @@ vim.opt.rtp:prepend(lazypath)
 --
 --  To update plugins you can run
 --    :Lazy update
---
 --Autoupdate
 vim.api.nvim_create_autocmd("VimEnter", {
 	callback = function()
 		require("lazy").update({ show = false })
 	end,
 })
-
+--
 -- NOTE: Here is where you install your plugins.
 require("lazy").setup({
 	-- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
@@ -356,7 +355,7 @@ require("lazy").setup({
 				--
 				defaults = {
 					-- mappings = {
-					-- 	i = { ["<c-enter>"] = "to_fuzzy_refine" },
+					--   i = { ['<c-enter>'] = 'to_fuzzy_refine' },
 					-- },
 					history = false,
 				},
@@ -452,6 +451,8 @@ require("lazy").setup({
 					},
 				},
 			},
+			-- Allows extra capabilities provided by nvim-cmp
+			"hrsh7th/cmp-nvim-lsp",
 		},
 		config = function()
 			-- Brief aside: **What is LSP?**
@@ -903,8 +904,6 @@ require("lazy").setup({
 		config = function(_, opts)
 			-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 
-			-- Prefer git instead of curl in order to improve connectivity in some environments
-			require("nvim-treesitter.install").prefer_git = true
 			---@diagnostic disable-next-line: missing-fields
 			require("nvim-treesitter.configs").setup(opts)
 
